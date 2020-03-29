@@ -1017,6 +1017,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gizmo: {fileID: 2077350038993155408, guid: 83af8a4ed6d35fb4b8ab4728887eab4c, type: 3}
   human: {fileID: 7786892628186768685, guid: de8d21a3b8a1ff04a88c4499a7f2fb79, type: 3}
+  trace: {fileID: 5624942304543731233, guid: 867b5e5e5206d734b9a02b3e3344c196, type: 3}
   forTest1: {fileID: 1148079070}
 --- !u!1 &1488212447
 GameObject:
