@@ -46,7 +46,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 4061839508520268033, guid: 64ea23f04b21f15418aa81aab77b7cff,
+  m_Motion: {fileID: -4791504522942941401, guid: 267b5db9a1e33a240b18cca83545fe5c,
     type: 3}
   m_Tag: tposeanim
   m_SpeedParameter: 
@@ -86,7 +86,7 @@ AnimatorController:
   m_AnimatorParameters:
   - m_Name: Speed
     m_Type: 1
-    m_DefaultFloat: 1
+    m_DefaultFloat: 0.7
     m_DefaultInt: 0
     m_DefaultBool: 0
     m_Controller: {fileID: 0}
@@ -94,7 +94,7 @@ AnimatorController:
     m_Type: 4
     m_DefaultFloat: 0
     m_DefaultInt: 0
-    m_DefaultBool: 0
+    m_DefaultBool: 1
     m_Controller: {fileID: 0}
   m_AnimatorLayers:
   - serializedVersion: 5
@@ -117,7 +117,7 @@ AnimatorState:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: walking
-  m_Speed: 1
+  m_Speed: 0.7
   m_CycleOffset: 0
   m_Transitions:
   - {fileID: 5637495998855625742}
@@ -154,9 +154,9 @@ AnimatorStateTransition:
   m_Mute: 0
   m_IsExit: 0
   serializedVersion: 3
-  m_TransitionDuration: 0.4922886
-  m_TransitionOffset: 0.000000028193064
-  m_ExitTime: 0.0000002766255
+  m_TransitionDuration: 0.6420506
+  m_TransitionOffset: 0
+  m_ExitTime: 0.00000030303752
   m_HasExitTime: 1
   m_HasFixedDuration: 1
   m_InterruptionSource: 0
@@ -179,9 +179,9 @@ AnimatorStateTransition:
   m_Mute: 0
   m_IsExit: 0
   serializedVersion: 3
-  m_TransitionDuration: 0.15223801
-  m_TransitionOffset: 0
-  m_ExitTime: 0.68440104
+  m_TransitionDuration: 0.76978195
+  m_TransitionOffset: 0.21046048
+  m_ExitTime: 0.266065
   m_HasExitTime: 1
   m_HasFixedDuration: 1
   m_InterruptionSource: 0
