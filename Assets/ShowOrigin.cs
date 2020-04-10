@@ -38,6 +38,13 @@ public class ShowOrigin : MonoBehaviour
     private Vector3 prePo;
     private Vector3 currPo;
     private int[] nocount;
+
+    private float testro;
+    private float testpoy;
+    private float testpoz;
+    public Slider testRo;
+    public Slider testPoy;
+    public Slider testPoz;
  
     void Awake()
     {
@@ -46,13 +53,24 @@ public class ShowOrigin : MonoBehaviour
     }
     void Start()
     {
+        var list = GameObject.FindGameObjectsWithTag("body");
+        for (int i = 0; i < list.Length; i++)
+        {
+            var mat = list[i].GetComponent<Renderer>().material;
+
+            mat.SetColor("_Color", new Color(mat.color.r, mat.color.g, mat.color.b, 1.0f));
+
+        }
+        testro = 0;
+        testpoy = 0f;
+        testpoz = 1f;
  
         walkstate = false;
         nocount = new int[3] { 1, 1, 1};
         prePo = Vector3.zero;
         currPo = Vector3.zero;
  
-        animspeed = 0.7f;
+        animspeed = 1f;
         diff = 0f;
    
         dist = 0f;
@@ -67,20 +85,38 @@ public class ShowOrigin : MonoBehaviour
          
         model = Instantiate(human, Vector3.zero, Quaternion.identity);
        
-        model.transform.localScale = new Vector3(1.0f, 1.0f,1.2f);
+        model.transform.localScale = new Vector3(0.8f, 1.0f,0.9f);
         model.transform.SetParent(m_SessionOrigin.camera.transform);
-        Vector3 v = Vector3.zero; v.y = -0.82f; v.z = 0.9f;
+        Vector3 v = Vector3.zero;  v.y = -0.5975334f; v.z =1.28f;
         model.transform.position = v;
      
-        model.transform.rotation=Quaternion.Euler(-49f,0,0);
+        model.transform.rotation=Quaternion.Euler(-67.1418f,0f,0);
          
 
         anim = model.GetComponent<Animator>();
         speedslider.onValueChanged.AddListener((float val) => SettingSpeed(val));
         alphaslider.onValueChanged.AddListener((float val) => SettingAlpha(val));
-       // guideToggle.onValueChanged.AddListener((bool val) => OnGuide(val));
-      
+        testPoz.onValueChanged.AddListener((float val) => Settingpoz(val));
+        testPoy.onValueChanged.AddListener((float val) => Settingpoy(val));
+
+        testRo.onValueChanged.AddListener((float val) => Settingro(val));
+
+        //guideToggle.onValueChanged.AddListener((bool val) => OnGuide(val));
+
         resetbtn.onClick.AddListener(resetclick);
+    }
+    private void Settingpoz(float val)
+    {
+        testpoz = testPoz.value; 
+    }
+    private void Settingpoy(float val)
+    {
+        testpoy = testPoy.value;
+        
+    }
+    private void Settingro(float val)
+    {
+        testro = testRo.value;
     }
 
     // Update is called once per frame
@@ -92,9 +128,24 @@ public class ShowOrigin : MonoBehaviour
         Vector3 direction = camera0.rotation * Vector3.forward;
 
         //모델 트랜스폼 업데이트
-        Vector3 t_vec1=Vector3.zero;
-   
+        Vector3 v = Vector3.zero; v.y = -0.5975334f; v.z = 1.28f;
+        model.transform.localPosition = v;
+
+        model.transform.localRotation = Quaternion.Euler(-67.1418f, 0f, 0);
+        /*
+        Vector3 t_vec1 = model.transform.localRotation.eulerAngles;
         
+        t_vec1.z = testro;
+        
+       //model.transform.localEulerAngles = t_vec1;
+        t_vec1 = model.transform.localPosition;
+        t_vec1.x = testpoy;
+       // model.transform.localPosition = t_vec1; 
+        t_vec1.x = t_vec1.y = t_vec1.z = testpoz;
+       // model.transform.localScale = t_vec1;*/
+
+
+
         if (timer > 1)
         {
             prePo = currPo;
@@ -112,7 +163,7 @@ public class ShowOrigin : MonoBehaviour
                 {
                     //정지상태
                     anim.SetBool("isWalk", false);
-                     
+                      
                     walkstate = false;
                 }
             }
@@ -132,7 +183,7 @@ public class ShowOrigin : MonoBehaviour
              
         }
 
-        forTest1.text = "카메라 " + m_SessionOrigin.camera.transform.position.x.ToString() + " 초속: " + diff.ToString() + "누적거리 " + dist.ToString();
+       // forTest1.text =  "회전 " + testro.ToString()+ "크기  " + testpoz.ToString() + " x이동  " + testpoy.ToString()+" 초속: " + diff.ToString() + "누적거리 " + dist.ToString();
         //옴 테스트
         
        
@@ -171,24 +222,30 @@ public class ShowOrigin : MonoBehaviour
 
         }
         timer += Time.deltaTime;
+        var monitor = GameObject.FindGameObjectsWithTag("monitor");
+        monitor[0].GetComponent<Text>().text= "초속: " + string.Format("{0:f2}", diff)+" m/s";
+        monitor[1].GetComponent<Text>().text = "누적거리: " + string.Format("{0:f2}",dist) + " m";
+
+
+
 
     }
-   /* private void createObj()
-    {
-        var t_model = model.transform;
-        Vector3 t_vec1 = t_model.position + t_model.forward * 0.5f + t_model.right * 0.3f;
-        objs[0].transform.position = t_vec1;
+    /* private void createObj()
+     {
+         var t_model = model.transform;
+         Vector3 t_vec1 = t_model.position + t_model.forward * 0.5f + t_model.right * 0.3f;
+         objs[0].transform.position = t_vec1;
 
-        t_vec1 = t_model.position + t_model.forward - t_model.right * 0.3f;
-        objs[1].transform.position = t_vec1;
+         t_vec1 = t_model.position + t_model.forward - t_model.right * 0.3f;
+         objs[1].transform.position = t_vec1;
 
-        t_vec1 = t_model.position + t_model.forward * 1.5f + t_model.right * 0.3f;
-        objs[2].transform.position = t_vec1;
+         t_vec1 = t_model.position + t_model.forward * 1.5f + t_model.right * 0.3f;
+         objs[2].transform.position = t_vec1;
 
-        t_vec1 = t_model.position + t_model.forward * 2.0f - t_model.right * 0.3f;
-        objs[3].transform.position = t_vec1;
-        circle.transform.position = model.transform.position;
-    }*/
+         t_vec1 = t_model.position + t_model.forward * 2.0f - t_model.right * 0.3f;
+         objs[3].transform.position = t_vec1;
+         circle.transform.position = model.transform.position;
+     }*/
     private void SettingSpeed(float value)
     {
         animspeed = speedslider.value;

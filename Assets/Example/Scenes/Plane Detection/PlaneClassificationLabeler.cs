@@ -40,8 +40,8 @@ public class PlaneClassificationLabeler : MonoBehaviour
     void UpdateLabel()
     {
         // Update text
-        m_TextMesh.text = m_ARPlane.classification.ToString()+"플x는 "+m_ARPlane.center.x.ToString()+
-                            " 플y는 "+m_ARPlane.center.y.ToString()+" 플z는 "+ m_ARPlane.center.z.ToString();
+       /* m_TextMesh.text = m_ARPlane.classification.ToString()+"플x는 "+m_ARPlane.center.x.ToString()+
+                            " 플y는 "+m_ARPlane.center.y.ToString()+" 플z는 "+ m_ARPlane.center.z.ToString();*/
 
         // Update Pose
         m_TextObj.transform.position = m_ARPlane.center;

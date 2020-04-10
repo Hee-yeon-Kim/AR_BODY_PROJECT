@@ -9,6 +9,9 @@ TagManager:
   - shirt
   - sneakers
   - guide
+  - m_speed
+  - m_dist
+  - monitor
   layers:
   - Default
   - TransparentFX
