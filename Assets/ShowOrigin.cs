@@ -30,7 +30,8 @@ public class ShowOrigin : MonoBehaviour
     public Slider alphaslider;
    
     public Button resetbtn;
-    private bool walkstate;
+    private bool walkstate=false;
+    private bool sitstate=false;
      
     private float diff;
     private float dist;
@@ -39,17 +40,33 @@ public class ShowOrigin : MonoBehaviour
     private Vector3 currPo;
     private int[] nocount;
 
+   
+    private Image planecondition;
+    private Text heightmonitor;
+    private float minheight;
+    private float maxheight;
+    private Text monitor_dist;
+    private Text monitor_diff;
+
     private float testro;
     private float testpoy;
     private float testpoz;
     public Slider testRo;
     public Slider testPoy;
     public Slider testPoz;
+    
  
     void Awake()
     {
         m_SessionOrigin = GetComponent<ARSessionOrigin>();
         m_ARPlaneManager=GetComponent<ARPlaneManager>();
+        planecondition = GameObject.FindGameObjectWithTag("done").GetComponent<Image>();
+        planecondition.enabled = false;
+        heightmonitor = GameObject.FindGameObjectWithTag("heightmonitor").GetComponent<Text>();
+        heightmonitor.enabled = false;
+        var monitor = GameObject.FindGameObjectsWithTag("monitor");
+        monitor_diff = monitor[0].GetComponent<Text>();
+        monitor_dist = monitor[1].GetComponent<Text>();
     }
     void Start()
     {
@@ -61,11 +78,10 @@ public class ShowOrigin : MonoBehaviour
             mat.SetColor("_Color", new Color(mat.color.r, mat.color.g, mat.color.b, 1.0f));
 
         }
-        testro = 0;
-        testpoy = 0f;
-        testpoz = 1f;
+        testro = -67.1418f;
+        testpoy = -0.5975334f;
+        testpoz = 1.28f;
  
-        walkstate = false;
         nocount = new int[3] { 1, 1, 1};
         prePo = Vector3.zero;
         currPo = Vector3.zero;
@@ -124,14 +140,21 @@ public class ShowOrigin : MonoBehaviour
     {
         
         var camera0 = m_SessionOrigin.camera.transform;
-        //테스트용 기즈모
-        Vector3 direction = camera0.rotation * Vector3.forward;
+        float bent = 0; 
 
+        float angle = camera0.eulerAngles.x;
+        if (angle >= 300)  angle=angle-360;
+        if (angle < -60) testpoy = -0.95f;
+        else if (angle > 80) testpoy = -0.45f;
+        else testpoy = (angle + 30) / 220 - 0.95f;
         //모델 트랜스폼 업데이트
-        Vector3 v = Vector3.zero; v.y = -0.5975334f; v.z = 1.28f;
+        Vector3 v = Vector3.zero; v.y = testpoy; v.z = testpoz;
         model.transform.localPosition = v;
 
-        model.transform.localRotation = Quaternion.Euler(-67.1418f, 0f, 0);
+        if (angle > 20 && angle < 80) testro = (angle - 20) * -2 / 15 - 67f;
+        else angle = -67f;
+
+        model.transform.localRotation = Quaternion.Euler(testro, 0f, 0);
         /*
         Vector3 t_vec1 = model.transform.localRotation.eulerAngles;
         
@@ -145,45 +168,52 @@ public class ShowOrigin : MonoBehaviour
        // model.transform.localScale = t_vec1;*/
 
 
-
+        //**초속-누적거리-이에 따른 걷기 뛰기 애니메이션 조절 파트**
         if (timer > 1)
         {
             prePo = currPo;
             currPo = m_SessionOrigin.camera.transform.position;
             prePo.y = 0;
             currPo.y = 0;
-            diff= Vector3.Distance(prePo, currPo);
+            diff= Vector3.Distance(prePo, currPo);//초속 ( 1초당 이동한 거리)
+                //애니메이터 속도 조절
+                animspeed = diff / 0.6f;//1이상시 뛰는 모드로 전환 그 이하는 걷기 모드//보통 0.6m/s일때 애니메이션 기본 속도
+                anim.SetFloat("Speed", animspeed);//속도 조절
             dist +=diff;
 
-            if (diff < 0.1) {
+            if (diff < 0.1) {//초속 0.1m미만연속 2초 초과시, 정지
                 if (nocount[0] == 1) nocount[0] = 0;
                 else if (nocount[1] == 1) nocount[1] = 0;
-                else if(nocount[2]==1) nocount[2] = 0;
+                //else if(nocount[2]==1) nocount[2] = 0;
                 else
                 {
                     //정지상태
                     anim.SetBool("isWalk", false);
-                      
+                    anim.SetBool("isStop", true);
+
                     walkstate = false;
                 }
             }
             else
             {
-                for (int i = 0; i < 3; i++) nocount[i] = 1;
+                for (int i = 0; i < 2; i++) nocount[i] = 1;//조금이라도 움직이면 다시 보행모드
                 //보행중인 상태
                 if (!walkstate)
                 {
                     
                     anim.SetBool("isWalk", true);
+                    anim.SetBool("isStop", false);
                     walkstate = true;
                 }
                
             }
             timer = 0;
-             
+            monitor_diff.text = "초속: " + string.Format("{0:f2}", diff) + " m/s";
+            monitor_dist.text = "누적거리: " + string.Format("{0:f2}", dist) + " m";
+
         }
 
-       // forTest1.text =  "회전 " + testro.ToString()+ "크기  " + testpoz.ToString() + " x이동  " + testpoy.ToString()+" 초속: " + diff.ToString() + "누적거리 " + dist.ToString();
+        forTest1.text = "회전 " + testro.ToString() + "크기  " + testpoz.ToString() + " x이동  " + testpoy.ToString()+"  카 "+camera0.rotation.eulerAngles.x.ToString()+ "  "+camera0.rotation.eulerAngles.y.ToString()+"  "+ camera0.rotation.eulerAngles.z.ToString();
         //옴 테스트
         
        
@@ -191,19 +221,29 @@ public class ShowOrigin : MonoBehaviour
 
         //string test9=" 평면갯수: "+m_ARPlaneManager.trackables.count.ToString();
 
+        //**평면인식파트**
         if (isFloor == false)
         {
             foreach (ARPlane plane in m_ARPlaneManager.trackables)
             {
                 //model.transform.position=new Vector3(model.transform.position.x, plane.center.y, model.transform.position.z);
-                if (plane.center.y < -1.3f)
+                //감지된 평면이 4m^2이상이거나 높이가 1.3m를 넘는다면 바닥으로 인지
+                float size = plane.size.x * plane.size.y;
+                if (  size> 4f||plane.center.y < -1.3f)
                 {
                     //model.transform.position = new Vector3(model.transform.position.x, plane.center.y, model.transform.position.z);
- 
+                    
                     floorID = plane.trackableId;
                     floor = m_ARPlaneManager.GetPlane(floorID).infinitePlane;
                     floorheight = floor.distance;
                     isFloor = true;
+                   
+                    heightmonitor.enabled = true;
+
+                    foreach (var t_plane in m_ARPlaneManager.trackables)
+                    {
+                        t_plane.gameObject.SetActive(false);
+                    }
                     m_ARPlaneManager.enabled = false;
                     break;
                 }
@@ -216,15 +256,25 @@ public class ShowOrigin : MonoBehaviour
            
             eyeheight=floor.GetDistanceToPoint(m_SessionOrigin.camera.transform.position);
             //test13 = "눈높이 " + eyeheight.ToString()+" 바닥높이: "+floorheight.ToString();
-           
-            //발자국
+            if (minheight > eyeheight) minheight = eyeheight;
+            if (maxheight < eyeheight) maxheight = eyeheight;
+            bent = maxheight - eyeheight;
+            heightmonitor.text = "눈높이: " + eyeheight + "\n굽힘정도: " + string.Format("{0:f2}", bent);
+      
+            if (bent > 0.3f)
+            {
+                anim.SetBool("isSit", true);//앉은 모드로의 전환
+                sitstate = true;
+            }
+            else if (sitstate == true)
+            {
+                anim.SetBool("isSit", false);//tpose로의 전환
+                sitstate = false;
+            }
 
 
         }
         timer += Time.deltaTime;
-        var monitor = GameObject.FindGameObjectsWithTag("monitor");
-        monitor[0].GetComponent<Text>().text= "초속: " + string.Format("{0:f2}", diff)+" m/s";
-        monitor[1].GetComponent<Text>().text = "누적거리: " + string.Format("{0:f2}",dist) + " m";
 
 
 
@@ -274,9 +324,14 @@ public class ShowOrigin : MonoBehaviour
         {
             Destroy(i);
         }
+        
         m_ARPlaneManager.enabled = true;
         isFloor= false;
         timer = 0;
+        planecondition.enabled = false;
+        walkstate = false;
+        sitstate = false;
+        anim.Play("tpose");
         
         
         
