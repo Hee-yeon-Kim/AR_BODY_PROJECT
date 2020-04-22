@@ -9,38 +9,39 @@ public class ShowOrigin : MonoBehaviour
 {
     private ARSessionOrigin m_SessionOrigin;
     private ARPlaneManager m_ARPlaneManager;
-      
+
     public GameObject human;
     public GameObject trace;
     private GameObject model;
     private TrackableId floorID;
-    private bool isFloor=false;
+    private bool isFloor = false;
     private Plane floor;
     private float eyeheight;
     private float floorheight;
     private float distance;
     private float timer;
+    private float foottimer;
     private List<GameObject> footlist;
-    public Text forTest1;
+    // public Text forTest1;
     // Start is called before the first frame update
-     
+
     private Animator anim;
     private float animspeed;
     public Slider speedslider;
     public Slider alphaslider;
-   
+
     public Button resetbtn;
-    private bool walkstate=false;
-    private bool sitstate=false;
-     
+
+    private bool sitstate = false;
+
     private float diff;
     private float dist;
-   
+
     private Vector3 prePo;
     private Vector3 currPo;
     private int[] nocount;
 
-   
+
     private Image planecondition;
     private Text heightmonitor;
     private float minheight;
@@ -51,15 +52,15 @@ public class ShowOrigin : MonoBehaviour
     private float testro;
     private float testpoy;
     private float testpoz;
-    public Slider testRo;
-    public Slider testPoy;
-    public Slider testPoz;
-    
- 
+    //  public Slider testRo;
+    //  public Slider testPoy;
+    //  public Slider testPoz;
+
+
     void Awake()
     {
         m_SessionOrigin = GetComponent<ARSessionOrigin>();
-        m_ARPlaneManager=GetComponent<ARPlaneManager>();
+        m_ARPlaneManager = GetComponent<ARPlaneManager>();
         planecondition = GameObject.FindGameObjectWithTag("done").GetComponent<Image>();
         planecondition.enabled = false;
         heightmonitor = GameObject.FindGameObjectWithTag("heightmonitor").GetComponent<Text>();
@@ -70,6 +71,7 @@ public class ShowOrigin : MonoBehaviour
     }
     void Start()
     {
+        floorheight = 1.45f;
         var list = GameObject.FindGameObjectsWithTag("body");
         for (int i = 0; i < list.Length; i++)
         {
@@ -81,41 +83,41 @@ public class ShowOrigin : MonoBehaviour
         testro = -67.1418f;
         testpoy = -0.5975334f;
         testpoz = 1.28f;
- 
-        nocount = new int[3] { 1, 1, 1};
+
+        nocount = new int[3] { 1, 1, 1 };
         prePo = Vector3.zero;
         currPo = Vector3.zero;
- 
+
         animspeed = 1f;
         diff = 0f;
-   
+
         dist = 0f;
         //테스트원
-       
+
         footlist = new List<GameObject>();
-        
-        Vector3 position0 = m_SessionOrigin.camera.transform.position;
- 
+
+
+
         timer = 0;
- 
-         
+        foottimer = 0;
+
         model = Instantiate(human, Vector3.zero, Quaternion.identity);
-       
-        model.transform.localScale = new Vector3(0.8f, 1.0f,0.9f);
+
+        model.transform.localScale = new Vector3(0.8f, 1.0f, 0.9f);
         model.transform.SetParent(m_SessionOrigin.camera.transform);
-        Vector3 v = Vector3.zero;  v.y = -0.5975334f; v.z =1.28f;
+        Vector3 v = Vector3.zero; v.y = -0.5975334f; v.z = 1.28f;
         model.transform.position = v;
-     
-        model.transform.rotation=Quaternion.Euler(-67.1418f,0f,0);
-         
+
+        model.transform.rotation = Quaternion.Euler(-67.1418f, 0f, 0);
+
 
         anim = model.GetComponent<Animator>();
         speedslider.onValueChanged.AddListener((float val) => SettingSpeed(val));
         alphaslider.onValueChanged.AddListener((float val) => SettingAlpha(val));
-        testPoz.onValueChanged.AddListener((float val) => Settingpoz(val));
-        testPoy.onValueChanged.AddListener((float val) => Settingpoy(val));
+        // testPoz.onValueChanged.AddListener((float val) => Settingpoz(val));
+        // testPoy.onValueChanged.AddListener((float val) => Settingpoy(val));
 
-        testRo.onValueChanged.AddListener((float val) => Settingro(val));
+        // testRo.onValueChanged.AddListener((float val) => Settingro(val));
 
         //guideToggle.onValueChanged.AddListener((bool val) => OnGuide(val));
 
@@ -123,27 +125,27 @@ public class ShowOrigin : MonoBehaviour
     }
     private void Settingpoz(float val)
     {
-        testpoz = testPoz.value; 
+        // testpoz = testPoz.value; 
     }
     private void Settingpoy(float val)
     {
-        testpoy = testPoy.value;
-        
+        // testpoy = testPoy.value;
+
     }
     private void Settingro(float val)
     {
-        testro = testRo.value;
+        // testro = testRo.value;
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+
         var camera0 = m_SessionOrigin.camera.transform;
-        float bent = 0; 
+        float bent = 0;
 
         float angle = camera0.eulerAngles.x;
-        if (angle >= 300)  angle=angle-360;
+        if (angle >= 300) angle = angle - 360;
         if (angle < -60) testpoy = -0.95f;
         else if (angle > 80) testpoy = -0.45f;
         else testpoy = (angle + 30) / 220 - 0.95f;
@@ -175,48 +177,48 @@ public class ShowOrigin : MonoBehaviour
             currPo = m_SessionOrigin.camera.transform.position;
             prePo.y = 0;
             currPo.y = 0;
-            diff= Vector3.Distance(prePo, currPo);//초속 ( 1초당 이동한 거리)
-                //애니메이터 속도 조절
-                animspeed = diff / 0.6f;//1이상시 뛰는 모드로 전환 그 이하는 걷기 모드//보통 0.6m/s일때 애니메이션 기본 속도
-                anim.SetFloat("Speed", animspeed);//속도 조절
-            dist +=diff;
+            diff = Vector3.Distance(prePo, currPo);//초속 ( 1초당 이동한 거리)
+                                                   //애니메이터 속도 조절
+            animspeed = diff / 0.6f;//1이상시 뛰는 모드로 전환 그 이하는 걷기 모드//보통 0.6m/s일때 애니메이션 기본 속도
+            anim.SetFloat("Speed", animspeed);//속도 조절
+            dist += diff;
 
-            if (diff < 0.1) {//초속 0.1m미만연속 2초 초과시, 정지
-                if (nocount[0] == 1) nocount[0] = 0;
-                else if (nocount[1] == 1) nocount[1] = 0;
-                //else if(nocount[2]==1) nocount[2] = 0;
-                else
-                {
-                    //정지상태
-                    anim.SetBool("isWalk", false);
-                    anim.SetBool("isStop", true);
+            /* if (diff < 0.1) {//초속 0.1m미만연속 2초 초과시, 정지
+                 if (nocount[0] == 1) nocount[0] = 0;
+                 else if (nocount[1] == 1) nocount[1] = 0;
+                 //else if(nocount[2]==1) nocount[2] = 0;
+                 else
+                 {
+                     //정지상태
+                     anim.SetBool("isWalk", false);
+                     anim.SetBool("isStop", true);
 
-                    walkstate = false;
-                }
-            }
-            else
-            {
-                for (int i = 0; i < 2; i++) nocount[i] = 1;//조금이라도 움직이면 다시 보행모드
-                //보행중인 상태
-                if (!walkstate)
-                {
-                    
-                    anim.SetBool("isWalk", true);
-                    anim.SetBool("isStop", false);
-                    walkstate = true;
-                }
-               
-            }
+                     walkstate = false;
+                 }
+             }
+             else
+             {
+                 for (int i = 0; i < 2; i++) nocount[i] = 1;//조금이라도 움직이면 다시 보행모드
+                 //보행중인 상태
+                 if (!walkstate)
+                 {
+
+                     anim.SetBool("isWalk", true);
+                     anim.SetBool("isStop", false);
+                     walkstate = true;
+                 }
+
+             }*/
             timer = 0;
             monitor_diff.text = "초속: " + string.Format("{0:f2}", diff) + " m/s";
             monitor_dist.text = "누적거리: " + string.Format("{0:f2}", dist) + " m";
 
         }
 
-        forTest1.text = "회전 " + testro.ToString() + "크기  " + testpoz.ToString() + " x이동  " + testpoy.ToString()+"  카 "+camera0.rotation.eulerAngles.x.ToString()+ "  "+camera0.rotation.eulerAngles.y.ToString()+"  "+ camera0.rotation.eulerAngles.z.ToString();
+        // forTest1.text = "회전 " + testro.ToString() + "크기  " + testpoz.ToString() + " x이동  " + testpoy.ToString()+"  카 "+camera0.rotation.eulerAngles.x.ToString()+ "  "+camera0.rotation.eulerAngles.y.ToString()+"  "+ camera0.rotation.eulerAngles.z.ToString();
         //옴 테스트
-        
-       
+
+
         //옴테스트
 
         //string test9=" 평면갯수: "+m_ARPlaneManager.trackables.count.ToString();
@@ -229,15 +231,16 @@ public class ShowOrigin : MonoBehaviour
                 //model.transform.position=new Vector3(model.transform.position.x, plane.center.y, model.transform.position.z);
                 //감지된 평면이 4m^2이상이거나 높이가 1.3m를 넘는다면 바닥으로 인지
                 float size = plane.size.x * plane.size.y;
-                if (  size> 4f||plane.center.y < -1.3f)
+                if (size > 4f || plane.center.y < -1.3f)
                 {
                     //model.transform.position = new Vector3(model.transform.position.x, plane.center.y, model.transform.position.z);
-                    
+
                     floorID = plane.trackableId;
                     floor = m_ARPlaneManager.GetPlane(floorID).infinitePlane;
                     floorheight = floor.distance;
                     isFloor = true;
-                   
+                    planecondition.enabled = true;
+
                     heightmonitor.enabled = true;
 
                     foreach (var t_plane in m_ARPlaneManager.trackables)
@@ -252,29 +255,58 @@ public class ShowOrigin : MonoBehaviour
         }
         else
         {//바닥인식후에 
-              
-           
-            eyeheight=floor.GetDistanceToPoint(m_SessionOrigin.camera.transform.position);
+
+
+            eyeheight = floor.GetDistanceToPoint(m_SessionOrigin.camera.transform.position);
             //test13 = "눈높이 " + eyeheight.ToString()+" 바닥높이: "+floorheight.ToString();
             if (minheight > eyeheight) minheight = eyeheight;
             if (maxheight < eyeheight) maxheight = eyeheight;
             bent = maxheight - eyeheight;
             heightmonitor.text = "눈높이: " + eyeheight + "\n굽힘정도: " + string.Format("{0:f2}", bent);
-      
-            if (bent > 0.3f)
+
+            if (bent > 0.5f)
             {
-                anim.SetBool("isSit", true);//앉은 모드로의 전환
-                sitstate = true;
-            }
-            else if (sitstate == true)
-            {
-                anim.SetBool("isSit", false);//tpose로의 전환
-                sitstate = false;
-            }
+                if (sitstate == false)
+                {
+                    anim.SetTrigger("goSit");
+                    anim.SetBool("isSit", true);//앉은 모드로의 전환
+                    sitstate = true;
+                }
 
 
+            }
+            else
+            {
+                if (sitstate == true)
+                {
+                    anim.SetBool("isSit", false);//tpose로의 전환
+                    sitstate = false;
+                }
+
+            }
+        }
+
+        if (foottimer > 3.5f)
+        {
+            if (diff > 0.2f)//보행중일때만 가장 최근의 35초 동안의 방향과 위치를 기록
+            {
+                if (footlist.Count == 10)
+                {
+                    Destroy(footlist[0]);
+                    footlist.RemoveAt(0);
+                }
+                Quaternion tmp = camera0.rotation;
+                tmp.x = 0; tmp.z = 0;
+                GameObject footprints;
+                footprints = Instantiate(trace, new Vector3(camera0.position.x, floorheight * -1 - 0.6f, camera0.position.z), tmp);
+                footprints.transform.localScale = new Vector3(0.035f, 0.035f, 0.035f);
+                footprints.transform.SetParent(m_SessionOrigin.transform);
+                footlist.Add(footprints);
+            }
+            foottimer = 0;
         }
         timer += Time.deltaTime;
+        foottimer += Time.deltaTime;
 
 
 
@@ -306,39 +338,41 @@ public class ShowOrigin : MonoBehaviour
     {
         float value = alphaslider.value;
         var list = GameObject.FindGameObjectsWithTag("body");
-        for (int i=0; i< list.Length;i++)
+        for (int i = 0; i < list.Length; i++)
         {
             var mat = list[i].GetComponent<Renderer>().material;
-            
-            mat.SetColor("_Color",new Color(mat.color.r, mat.color.g, mat.color.b, value));
+
+            mat.SetColor("_Color", new Color(mat.color.r, mat.color.g, mat.color.b, value));
 
         }
     }
-   
+
     private void resetclick()
     {
         diff = 0;
         dist = 0;
-        
+
         foreach (GameObject i in footlist)
         {
             Destroy(i);
         }
-        
-        m_ARPlaneManager.enabled = true;
-        isFloor= false;
+
+
+
         timer = 0;
-        planecondition.enabled = false;
-        walkstate = false;
+
+        // walkstate = false;
         sitstate = false;
+        maxheight = eyeheight;
+
         anim.Play("tpose");
-        
-        
-        
+
+
+
     }
     private void OnDisable()
     {
-        foreach(GameObject i in footlist)
+        foreach (GameObject i in footlist)
         {
             Destroy(i);
         }
