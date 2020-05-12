@@ -15,6 +15,13 @@ TagManager:
   - planecondition
   - heightmonitor
   - done
+  - btdone
+  - imumonitor
+  - origin
+  - btdone2
+  - imumonitor2
+  - BtManager
+  - BTinit
   layers:
   - Default
   - TransparentFX

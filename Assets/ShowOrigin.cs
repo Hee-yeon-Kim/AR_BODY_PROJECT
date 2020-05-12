@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.XR.ARSubsystems;
 using UnityEngine.XR.ARFoundation;
+using System;
 
 public class ShowOrigin : MonoBehaviour
 {
@@ -12,6 +13,12 @@ public class ShowOrigin : MonoBehaviour
 
     public GameObject human;
     public GameObject trace;
+
+    public Slider alphaslider;
+    public Toggle righttog;
+    public Button resetbtn;
+    public Slider multiply;
+
     private GameObject model;
     private TrackableId floorID;
     private bool isFloor = false;
@@ -22,24 +29,19 @@ public class ShowOrigin : MonoBehaviour
     private float timer;
     private float foottimer;
     private List<GameObject> footlist;
-    // public Text forTest1;
+    public Text forTest1;
     // Start is called before the first frame update
 
     private Animator anim;
     private float animspeed;
-    public Slider speedslider;
-    public Slider alphaslider;
-
-    public Button resetbtn;
-
+   
     private bool sitstate = false;
 
-    private float diff;
+   [HideInInspector]public float diff;
     private float dist;
 
     private Vector3 prePo;
     private Vector3 currPo;
-    private int[] nocount;
 
 
     private Image planecondition;
@@ -48,26 +50,31 @@ public class ShowOrigin : MonoBehaviour
     private float maxheight;
     private Text monitor_dist;
     private Text monitor_diff;
-
     private float testro;
     private float testpoy;
     private float testpoz;
-    //  public Slider testRo;
-    //  public Slider testPoy;
-    //  public Slider testPoz;
 
-
+    private string x;
+    public Toggle iktog;
+    [HideInInspector] public bool ik = true;
+    [HideInInspector] public float multi= 1.5f;
+    [HideInInspector] public bool side = true;//오른발(false-default) 왼발(true) 구반 
     void Awake()
     {
         m_SessionOrigin = GetComponent<ARSessionOrigin>();
         m_ARPlaneManager = GetComponent<ARPlaneManager>();
         planecondition = GameObject.FindGameObjectWithTag("done").GetComponent<Image>();
         planecondition.enabled = false;
+       
         heightmonitor = GameObject.FindGameObjectWithTag("heightmonitor").GetComponent<Text>();
         heightmonitor.enabled = false;
+       
         var monitor = GameObject.FindGameObjectsWithTag("monitor");
         monitor_diff = monitor[0].GetComponent<Text>();
         monitor_dist = monitor[1].GetComponent<Text>();
+         ik = true;
+        side = true;
+        multi = 1.5f;
     }
     void Start()
     {
@@ -83,8 +90,7 @@ public class ShowOrigin : MonoBehaviour
         testro = -67.1418f;
         testpoy = -0.5975334f;
         testpoz = 1.28f;
-
-        nocount = new int[3] { 1, 1, 1 };
+     
         prePo = Vector3.zero;
         currPo = Vector3.zero;
 
@@ -95,9 +101,7 @@ public class ShowOrigin : MonoBehaviour
         //테스트원
 
         footlist = new List<GameObject>();
-
-
-
+ 
         timer = 0;
         foottimer = 0;
 
@@ -109,37 +113,41 @@ public class ShowOrigin : MonoBehaviour
         model.transform.position = v;
 
         model.transform.rotation = Quaternion.Euler(-67.1418f, 0f, 0);
-
-
+ 
         anim = model.GetComponent<Animator>();
-        speedslider.onValueChanged.AddListener((float val) => SettingSpeed(val));
         alphaslider.onValueChanged.AddListener((float val) => SettingAlpha(val));
-        // testPoz.onValueChanged.AddListener((float val) => Settingpoz(val));
-        // testPoy.onValueChanged.AddListener((float val) => Settingpoy(val));
+        multiply.onValueChanged.AddListener((float val) => SettingMulti(val));
 
-        // testRo.onValueChanged.AddListener((float val) => Settingro(val));
-
-        //guideToggle.onValueChanged.AddListener((bool val) => OnGuide(val));
-
+        righttog.onValueChanged.AddListener((bool val) => sidechoice(val));
         resetbtn.onClick.AddListener(resetclick);
+        iktog.onValueChanged.AddListener((bool val) => setik(val));
+        
     }
-    private void Settingpoz(float val)
+    void SettingMulti(float val)
     {
-        // testpoz = testPoz.value; 
+        multi = multiply.value;
     }
-    private void Settingpoy(float val)
+   
+    void setik(bool val)
     {
-        // testpoy = testPoy.value;
+        if (iktog.isOn)
+        {
+            anim.SetTrigger("Empty");
+            ik = true;
+            anim.SetBool("isIK", true);
+            
+        }
+        else
+        {
+            ik = false;
+            anim.SetBool("isIK", false);
+        }
 
     }
-    private void Settingro(float val)
-    {
-        // testro = testRo.value;
-    }
-
     // Update is called once per frame
     void Update()
     {
+        forTest1.text = anim.GetCurrentAnimatorStateInfo(0).ToString();
 
         var camera0 = m_SessionOrigin.camera.transform;
         float bent = 0;
@@ -157,18 +165,7 @@ public class ShowOrigin : MonoBehaviour
         else angle = -67f;
 
         model.transform.localRotation = Quaternion.Euler(testro, 0f, 0);
-        /*
-        Vector3 t_vec1 = model.transform.localRotation.eulerAngles;
         
-        t_vec1.z = testro;
-        
-       //model.transform.localEulerAngles = t_vec1;
-        t_vec1 = model.transform.localPosition;
-        t_vec1.x = testpoy;
-       // model.transform.localPosition = t_vec1; 
-        t_vec1.x = t_vec1.y = t_vec1.z = testpoz;
-       // model.transform.localScale = t_vec1;*/
-
 
         //**초속-누적거리-이에 따른 걷기 뛰기 애니메이션 조절 파트**
         if (timer > 1)
@@ -178,37 +175,14 @@ public class ShowOrigin : MonoBehaviour
             prePo.y = 0;
             currPo.y = 0;
             diff = Vector3.Distance(prePo, currPo);//초속 ( 1초당 이동한 거리)
-                                                   //애니메이터 속도 조절
+           // if (diff < 0.1f) ik = true; else ik=false; 
+            //애니메이터 속도 조절
             animspeed = diff / 0.6f;//1이상시 뛰는 모드로 전환 그 이하는 걷기 모드//보통 0.6m/s일때 애니메이션 기본 속도
+ 
             anim.SetFloat("Speed", animspeed);//속도 조절
-            dist += diff;
+            if(diff>0.06f) dist += diff;
 
-            /* if (diff < 0.1) {//초속 0.1m미만연속 2초 초과시, 정지
-                 if (nocount[0] == 1) nocount[0] = 0;
-                 else if (nocount[1] == 1) nocount[1] = 0;
-                 //else if(nocount[2]==1) nocount[2] = 0;
-                 else
-                 {
-                     //정지상태
-                     anim.SetBool("isWalk", false);
-                     anim.SetBool("isStop", true);
-
-                     walkstate = false;
-                 }
-             }
-             else
-             {
-                 for (int i = 0; i < 2; i++) nocount[i] = 1;//조금이라도 움직이면 다시 보행모드
-                 //보행중인 상태
-                 if (!walkstate)
-                 {
-
-                     anim.SetBool("isWalk", true);
-                     anim.SetBool("isStop", false);
-                     walkstate = true;
-                 }
-
-             }*/
+           
             timer = 0;
             monitor_diff.text = "초속: " + string.Format("{0:f2}", diff) + " m/s";
             monitor_dist.text = "누적거리: " + string.Format("{0:f2}", dist) + " m";
@@ -255,8 +229,7 @@ public class ShowOrigin : MonoBehaviour
         }
         else
         {//바닥인식후에 
-
-
+            
             eyeheight = floor.GetDistanceToPoint(m_SessionOrigin.camera.transform.position);
             //test13 = "눈높이 " + eyeheight.ToString()+" 바닥높이: "+floorheight.ToString();
             if (minheight > eyeheight) minheight = eyeheight;
@@ -264,23 +237,25 @@ public class ShowOrigin : MonoBehaviour
             bent = maxheight - eyeheight;
             heightmonitor.text = "눈높이: " + eyeheight + "\n굽힘정도: " + string.Format("{0:f2}", bent);
 
-            if (bent > 0.5f)
+            if (ik==false&&bent > 0.5f)
             {
                 if (sitstate == false)
                 {
                     anim.SetTrigger("goSit");
                     anim.SetBool("isSit", true);//앉은 모드로의 전환
                     sitstate = true;
+                   // ik = true;//블루투스 연결확인필요
                 }
 
 
             }
             else
             {
-                if (sitstate == true)
+                if (ik == false && sitstate == true)
                 {
                     anim.SetBool("isSit", false);//tpose로의 전환
                     sitstate = false;
+                   
                 }
 
             }
@@ -312,6 +287,15 @@ public class ShowOrigin : MonoBehaviour
 
 
     }
+   
+    public void sidechoice(bool val)
+    {
+        if (righttog.isOn)
+        {
+            side = false;//오른발
+        }
+        else side = true;//왼발
+    }
     /* private void createObj()
      {
          var t_model = model.transform;
@@ -328,11 +312,6 @@ public class ShowOrigin : MonoBehaviour
          objs[3].transform.position = t_vec1;
          circle.transform.position = model.transform.position;
      }*/
-    private void SettingSpeed(float value)
-    {
-        animspeed = speedslider.value;
-        anim.SetFloat("Speed", animspeed);
-    }
 
     private void SettingAlpha(float val)
     {
@@ -365,258 +344,21 @@ public class ShowOrigin : MonoBehaviour
         sitstate = false;
         maxheight = eyeheight;
 
-        anim.Play("tpose");
+        if (ik ==false) anim.Play("tpose"); 
 
 
 
     }
-    private void OnDisable()
-    {
-        foreach (GameObject i in footlist)
-        {
-            Destroy(i);
-        }
-    }
-}
-
-
-/*자기몸위로 + 장애물 테스트 04-08
- using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.XR.ARSubsystems;
-using UnityEngine.XR.ARFoundation;
-
-public class ShowOrigin : MonoBehaviour
-{
-    private ARSessionOrigin m_SessionOrigin;
-    private ARPlaneManager m_ARPlaneManager;
-    public GameObject gizmo;
-    private GameObject prefab1;
-    public GameObject human;
-    public GameObject trace;
-    private GameObject model;
-    private TrackableId floorID;
-    private bool isFloor=false;
-    private Plane floor;
-    private float eyeheight;
-    private float floorheight;
-    private float distance;
-    private float timer;
-    private List<GameObject> footlist;
-    public Text forTest1;
-    // Start is called before the first frame update
-    string test13 = ""; string test12 = "";
-    private Animator anim;
-    public Scrollbar speedslider;
-    public Scrollbar alphaslider;
-    public Toggle guideToggle;
-    private GameObject guide;
-    private Animator anim2;
-    public Button resetbtn;
-
-    //옴
-    public GameObject obj1;
-    private List<GameObject> objs;
-    //테스트원
-    public GameObject Circle;
-    private GameObject circle;
-    public Slider  circleBar;
+    
     
 
-    void Awake()
-    {
-        m_SessionOrigin = GetComponent<ARSessionOrigin>();
-        m_ARPlaneManager=GetComponent<ARPlaneManager>();
-    }
-    void Start()
-    {
-        forTest1.text = "성공1";
-        //테스트원
-        circle=Instantiate(Circle, m_SessionOrigin.transform);
-        forTest1.text = "성공11";
-        footlist = new List<GameObject>();
-        objs = new List <GameObject>();
-        forTest1.text = "성공13";
-        for (int i=0; i< 4; i++)
-        {
-            objs.Add(Instantiate(obj1, m_SessionOrigin.transform, false));
-        }
-
-        Vector3 position0 = m_SessionOrigin.camera.transform.position;
-
-        prefab1 = Instantiate(gizmo, position0, Quaternion.identity);//테스트용 기즈모
-        prefab1.transform.SetParent(m_SessionOrigin.transform);
- 
-        timer = 0;
-
-        model = Instantiate(human, position0, Quaternion.identity);
-        model.transform.localScale = new Vector3(1.4f, 1.4f,1.4f);
-        model.transform.SetParent(m_SessionOrigin.transform);
-        anim = model.GetComponent<Animator>();
-        speedslider.onValueChanged.AddListener((float val) => SettingSpeed(val));
-        alphaslider.onValueChanged.AddListener((float val) => SettingAlpha(val));
-       // guideToggle.onValueChanged.AddListener((bool val) => OnGuide(val));
-       circleBar.onValueChanged.AddListener((float val) => TestCircle(val));
-        resetbtn.onClick.AddListener(resetclick);
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-        var camera0 = m_SessionOrigin.camera.transform;
-        //테스트용 기즈모
-        Vector3 direction = camera0.rotation * Vector3.forward;
-        prefab1.transform.position = camera0.position + direction * 0.4f;
-
-        //모델 트랜스폼 업데이트
-        Vector3 t_vec1 = camera0.forward * -1*0.5f;
-        t_vec1.y = -2.3f;
-        Vector3 t_vec2 = camera0.position;
-        t_vec2.y = 0;
-        model.transform.position = t_vec2 + t_vec1;
-        Quaternion t_qtn = new Quaternion(0, 0, 0, 0);
-        t_qtn.y = camera0.rotation.y;
-        t_qtn.w = camera0.rotation.w;
-        model.transform.rotation = t_qtn;
-
-        //옴 테스트
-        var t_model = model.transform;
-        if (timer == 1.5)
-        {
-            
-            t_vec1 = t_model.position + t_model.forward * 0.5f + t_model.right * 0.3f;
-            objs[0].transform.position = t_vec1;
-
-        }
-        else if(timer==3)
-        {
-            t_vec1 = t_model.position + t_model.forward * 1.0f - t_model.right * 0.3f;
-            objs[0].transform.position = t_vec1;
-        }
-        else if(timer==4.5)
-        {
-            t_vec1 = t_model.position + t_model.forward * 1.5f + t_model.right * 0.3f;
-            objs[0].transform.position = t_vec1;
-        }
-        else if(timer==6)
-        { 
-            t_vec1 = t_model.position + t_model.forward * 2.0f - t_model.right * 0.3f;
-            objs[0].transform.position = t_vec1;
-            timer = 0;
-        }
-       
-        //옴테스트
-
-        //string test9=" 평면갯수: "+m_ARPlaneManager.trackables.count.ToString();
-
-        if (isFloor == false)
-        {
-            foreach (ARPlane plane in m_ARPlaneManager.trackables)
-            {
-                //model.transform.position=new Vector3(model.transform.position.x, plane.center.y, model.transform.position.z);
-                if (plane.center.y < -1.3f)
-                {
-                    //model.transform.position = new Vector3(model.transform.position.x, plane.center.y, model.transform.position.z);
-                    test12 = "찾다!! Local Plane x는: " + plane.transform.localPosition.x.ToString() + " y는: " + plane.transform.localPosition.y.ToString() + " z는: " + plane.transform.localPosition.z.ToString();
-
-                    floorID = plane.trackableId;
-                    floor = m_ARPlaneManager.GetPlane(floorID).infinitePlane;
-                    floorheight = floor.distance;
-                    isFloor = true;
-                    m_ARPlaneManager.enabled = false;
-                      
-                    test12 = "  Local Plane x는: " + plane.transform.localPosition.x.ToString() + " y는: " + plane.transform.localPosition.y.ToString() + " z는: " + plane.transform.localPosition.z.ToString();
-                    
-  
-                    break;
-                }
-
-            }
-        }
-        else
-        {//바닥인식후에 
-              
-           
-            eyeheight=floor.GetDistanceToPoint(m_SessionOrigin.camera.transform.position);
-            test13 = "눈높이 " + eyeheight.ToString()+" 바닥높이: "+floorheight.ToString();
-           
-            //발자국
-           
-
-
-        }
-        timer += Time.deltaTime;
-
-    }
-    private void createObj()
-    {
-        var t_model = model.transform;
-        Vector3 t_vec1 = t_model.position + t_model.forward * 0.5f + t_model.right * 0.3f;
-        objs[0].transform.position = t_vec1;
-
-        t_vec1 = t_model.position + t_model.forward - t_model.right * 0.3f;
-        objs[1].transform.position = t_vec1;
-
-        t_vec1 = t_model.position + t_model.forward * 1.5f + t_model.right * 0.3f;
-        objs[2].transform.position = t_vec1;
-
-        t_vec1 = t_model.position + t_model.forward * 2.0f - t_model.right * 0.3f;
-        objs[3].transform.position = t_vec1;
-        circle.transform.position = model.transform.position;
-    }
-    private void SettingSpeed(float value)
-    {
-        float val = speedslider.value;
-        anim.SetBool("isWalk", true);
-        anim.SetFloat("Speed", val);
-         
-        
-    }
-
-    private void SettingAlpha(float val)
-    {
-        float value = alphaslider.value;
-        var list = GameObject.FindGameObjectsWithTag("body");
-        for (int i=0; i< list.Length;i++)
-        {
-            var mat = list[i].GetComponent<Renderer>().material;
-            
-            mat.SetColor("_Color",new Color(mat.color.r, mat.color.g, mat.color.b, value));
-
-        }
-    }
-    private void TestCircle(float val)
-    {
-        float value = circleBar.value;
-        var c = circle.transform.localScale;
-        c.x = value;
-        c.z = value;
-    }
-    private void resetclick()
+    private void OnDestroy()
     {
         foreach (GameObject i in footlist)
-        {
-            Destroy(i);
-        }
-        m_ARPlaneManager.enabled = true;
-        isFloor= false;
-        timer = 0;
-        //if(prefab1!=null) Destroy(prefab1);
-        //if (model != null) Destroy(model);
-       // if (guide != null) Destroy(guide);
-        
-        
-    }
-    private void OnDisable()
-    {
-        foreach(GameObject i in footlist)
         {
             Destroy(i);
         }
     }
 }
 
-     */
+ 
