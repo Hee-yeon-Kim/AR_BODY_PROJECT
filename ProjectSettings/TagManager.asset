@@ -4,13 +4,6 @@
 TagManager:
   serializedVersion: 2
   tags:
-  - body
-  - pants
-  - shirt
-  - sneakers
-  - guide
-  - m_speed
-  - m_dist
   - monitor
   - planecondition
   - heightmonitor
@@ -22,6 +15,14 @@ TagManager:
   - imumonitor2
   - BtManager
   - BTinit
+  - incircle
+  - circle
+  - straight
+  - ik
+  - mycollider
+  - body
+  - reset
+  - graphtog
   layers:
   - Default
   - TransparentFX

@@ -1,0 +1,79 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!687078895 &4343727234628468602
+SpriteAtlas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: New Sprite Atlas
+  m_EditorData:
+    serializedVersion: 2
+    textureSettings:
+      serializedVersion: 2
+      anisoLevel: 1
+      compressionQuality: 50
+      maxTextureSize: 2048
+      textureCompression: 0
+      filterMode: 1
+      generateMipMaps: 0
+      readable: 0
+      crunchedCompression: 0
+      sRGB: 1
+    platformSettings: []
+    packingSettings:
+      serializedVersion: 2
+      padding: 4
+      blockOffset: 1
+      allowAlphaSplitting: 0
+      enableRotation: 1
+      enableTightPacking: 0
+    variantMultiplier: 1
+    packables:
+    - {fileID: 2800000, guid: 73fc9e444f8d56d4aa9c7b9659922f75, type: 3}
+    - {fileID: 2800000, guid: 9430668144f224f48876b673b444b909, type: 3}
+    - {fileID: 2800000, guid: eaf4049bc909fee48b21413bbee59773, type: 3}
+    - {fileID: 2800000, guid: d4e32f41939e5c642a42bf478a9cd0c9, type: 3}
+    - {fileID: 2800000, guid: 9283f48c6d7345140a60a43ec15695e1, type: 3}
+    - {fileID: 2800000, guid: 2f5bf4f6ab52b5246b9ea423828ccfad, type: 3}
+    - {fileID: 2800000, guid: cdb300cb3e4e341408f3c5bacef48751, type: 3}
+    - {fileID: 2800000, guid: 9d92c58e1fb6a184daf2062c9597fc41, type: 3}
+    - {fileID: 2800000, guid: c7fb9080eeb51864a926608dc9436c80, type: 3}
+    - {fileID: 2800000, guid: 29983edcde663d6479fab1f2dae98126, type: 3}
+    - {fileID: 2800000, guid: bdf9c1d9e02af2c4ebdc8b404a7d1b8e, type: 3}
+    - {fileID: 2800000, guid: 62257b16f94073f4390570a17c8efa6b, type: 3}
+    - {fileID: 2800000, guid: 4e92bb63480937c45b01c5d3145bb47d, type: 3}
+    - {fileID: 2800000, guid: 37628ae04305e5e4c92686621495026d, type: 3}
+    - {fileID: 2800000, guid: 75163f5ec55c84d42992bb018075feba, type: 3}
+    - {fileID: 2800000, guid: 7901779951cc3b0478a412555d129c84, type: 3}
+    totalSpriteSurfaceArea: 857536
+    bindAsDefault: 1
+  m_MasterAtlas: {fileID: 0}
+  m_PackedSprites:
+  - {fileID: 21300000, guid: c7fb9080eeb51864a926608dc9436c80, type: 3}
+  - {fileID: 21300000, guid: d4e32f41939e5c642a42bf478a9cd0c9, type: 3}
+  - {fileID: 21300000, guid: 9430668144f224f48876b673b444b909, type: 3}
+  - {fileID: 21300000, guid: 4e92bb63480937c45b01c5d3145bb47d, type: 3}
+  - {fileID: 21300000, guid: 73fc9e444f8d56d4aa9c7b9659922f75, type: 3}
+  - {fileID: 21300000, guid: 62257b16f94073f4390570a17c8efa6b, type: 3}
+  - {fileID: 21300000, guid: 2f5bf4f6ab52b5246b9ea423828ccfad, type: 3}
+  - {fileID: 21300000, guid: eaf4049bc909fee48b21413bbee59773, type: 3}
+  - {fileID: 21300000, guid: cdb300cb3e4e341408f3c5bacef48751, type: 3}
+  - {fileID: 21300000, guid: 9283f48c6d7345140a60a43ec15695e1, type: 3}
+  - {fileID: 21300000, guid: 29983edcde663d6479fab1f2dae98126, type: 3}
+  - {fileID: 21300000, guid: 9d92c58e1fb6a184daf2062c9597fc41, type: 3}
+  m_PackedSpriteNamesToIndex:
+  - r_right
+  - g_left
+  - doneicon
+  - straight_path
+  - circle_path
+  - settingicon
+  - leftfoot
+  - footprints
+  - loadingicon
+  - g_right
+  - rightfoot
+  - r_left
+  m_Tag: New Sprite Atlas
+  m_IsVariant: 0

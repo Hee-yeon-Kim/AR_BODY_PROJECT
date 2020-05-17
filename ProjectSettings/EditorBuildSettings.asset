@@ -110,6 +110,9 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/BluetoothAPI/Scenes/scan_scene2.unity
     guid: 789d17ad702404f68a1a9d43a3f83f58
+  - enabled: 0
+    path: Assets/Scenes/temp.unity
+    guid: 1a05bc08c5927ce4497d07997ecb3502
   m_configObjects:
     com.unity.xr.arkit.PlayerSettings: {fileID: 11400000, guid: 2d5fb8e61571b4e3897f221189089fd6,
       type: 2}

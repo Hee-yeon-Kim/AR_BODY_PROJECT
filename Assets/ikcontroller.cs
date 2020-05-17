@@ -1,35 +1,46 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+
 
 public class ikcontroller : MonoBehaviour
 {
     ShowOrigin main;
     Animator anim2;
+ 
     BluetoothManager btmanager;
-    float pitch1=0;
+
+    float pitch1 =0;
     float _pitch1=0;
     float roll1=0;
     float _roll1=0;
-     float gap_p1 = 0;
+    float gap_p1 = 0;
     float gap_r1 = 0;
     float pitch2 = 0;
     float roll2 = 0;
     float _roll2 = 0;
-     float gap_p2 = 0;
+    float gap_p2 = 0;
     float gap_r2= 0;
     float bent = 0;
     float _bent = 0;
     float gap_bent = 0;
+    bool enter;
   
+
+
     // Start is called before the first frame update
     void Start()
     {
-        main = GameObject.FindGameObjectWithTag("origin").GetComponent<ShowOrigin>();
+        enter = false; 
         btmanager = GameObject.FindGameObjectWithTag("BtManager").GetComponent<BluetoothManager>();
+        main = GameObject.FindGameObjectWithTag("origin").GetComponent<ShowOrigin>();
         anim2 = gameObject.GetComponent<Animator>();
-
+       
     }
+    
+    
+    
     private void OnAnimatorIK(int layerIndex)
     {
         if (main.ik == false | btmanager.connect1 == false | btmanager.connect2 == false)
@@ -86,6 +97,7 @@ public class ikcontroller : MonoBehaviour
             {
                 anim2.SetBoneLocalRotation(HumanBodyBones.RightUpperLeg, Quaternion.Euler(-180 + _pitch1, 180, 0));
                 anim2.SetBoneLocalRotation(HumanBodyBones.RightLowerLeg, Quaternion.Euler(-25f, 0, 0));
+            
             }
            
             
@@ -95,16 +107,7 @@ public class ikcontroller : MonoBehaviour
         {
           
         }
-    }
-    
-
-
-
-
-
-    // Update is called once per frame
-    void Update()
-    {
         
     }
+
 }

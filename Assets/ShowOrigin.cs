@@ -12,23 +12,40 @@ public class ShowOrigin : MonoBehaviour
     private ARPlaneManager m_ARPlaneManager;
 
     public GameObject human;
-    public GameObject trace;
+   
 
     public Slider alphaslider;
     public Toggle righttog;
     public Button resetbtn;
     public Slider multiply;
+    //그래프 UI
+    Toggle graphtog;
+    [HideInInspector] public int right_pass;
+    [HideInInspector] public int right_fail;
+
+    [HideInInspector] public int left_pass;
+    [HideInInspector] public int left_fail;
+
+    [HideInInspector] public int total;
+    public Image totalbar;
+    public Slider leftbar;
+    public Slider rightbar;
+    public Text timetext;
+    public Text distancetext;
+    public Text steptext;
+    public Text accutext;
+    //
 
     private GameObject model;
     private TrackableId floorID;
     private bool isFloor = false;
     private Plane floor;
-    private float eyeheight;
-    private float floorheight;
-    private float distance;
+
+    [HideInInspector] public float eyeheight;
+    [HideInInspector]public float floorheight;
+    [HideInInspector] public float distance;
     private float timer;
-    private float foottimer;
-    private List<GameObject> footlist;
+ 
     public Text forTest1;
     // Start is called before the first frame update
 
@@ -72,13 +89,20 @@ public class ShowOrigin : MonoBehaviour
         var monitor = GameObject.FindGameObjectsWithTag("monitor");
         monitor_diff = monitor[0].GetComponent<Text>();
         monitor_dist = monitor[1].GetComponent<Text>();
-         ik = true;
+         ik = false;
         side = true;
         multi = 1.5f;
+
+        graphtog = GameObject.FindGameObjectWithTag("graphtog").GetComponent<Toggle>();
+        right_fail = 0;
+        right_pass = 0;
+        left_fail = 0;
+        left_pass = 0;
+        graphtog.onValueChanged.AddListener((bool val) => settinggraph(val));
     }
     void Start()
     {
-        floorheight = 1.45f;
+        floorheight = 0.0f;
         var list = GameObject.FindGameObjectsWithTag("body");
         for (int i = 0; i < list.Length; i++)
         {
@@ -100,11 +124,6 @@ public class ShowOrigin : MonoBehaviour
         dist = 0f;
         //테스트원
 
-        footlist = new List<GameObject>();
- 
-        timer = 0;
-        foottimer = 0;
-
         model = Instantiate(human, Vector3.zero, Quaternion.identity);
 
         model.transform.localScale = new Vector3(0.8f, 1.0f, 0.9f);
@@ -122,6 +141,24 @@ public class ShowOrigin : MonoBehaviour
         resetbtn.onClick.AddListener(resetclick);
         iktog.onValueChanged.AddListener((bool val) => setik(val));
         
+    }
+    public void settinggraph(bool val)
+    {
+        steptext.text = total.ToString() + " 걸음";
+        distancetext.text = string.Format("{0:f2}", dist) + " m";
+        float time = Time.realtimeSinceStartup;
+        int time2 = (int)(time / 60.0f);
+        timetext.text = time2.ToString() + " 분";
+        int right = right_pass + left_pass;
+        float fill = right / total;
+        int fill2 = (int) (fill * 100);
+        totalbar.fillAmount = fill;
+        accutext.text = fill2.ToString() + "%";
+
+        float rightfail = right_fail / (right_fail + right_pass);
+        rightbar.value = rightfail;
+        float leftfail = left_fail / (left_fail + left_pass);
+        leftbar.value = leftfail;
     }
     void SettingMulti(float val)
     {
@@ -147,7 +184,6 @@ public class ShowOrigin : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        forTest1.text = anim.GetCurrentAnimatorStateInfo(0).ToString();
 
         var camera0 = m_SessionOrigin.camera.transform;
         float bent = 0;
@@ -175,27 +211,29 @@ public class ShowOrigin : MonoBehaviour
             prePo.y = 0;
             currPo.y = 0;
             diff = Vector3.Distance(prePo, currPo);//초속 ( 1초당 이동한 거리)
-           // if (diff < 0.1f) ik = true; else ik=false; 
-            //애니메이터 속도 조절
-            animspeed = diff / 0.6f;//1이상시 뛰는 모드로 전환 그 이하는 걷기 모드//보통 0.6m/s일때 애니메이션 기본 속도
- 
-            anim.SetFloat("Speed", animspeed);//속도 조절
-            if(diff>0.06f) dist += diff;
+            if (diff < 0.1f)
+            {
+                ik = true;//거의 정지-모션캡쳐파트
+              
+                anim.SetBool("isIK", true);
+                anim.SetTrigger("Empty");
+            }
+            else//보행파트-공간인식이용파트
+            {
+                ik = false;
+                anim.SetBool("isIK", false);
+                if (diff < 1.5f) animspeed = diff / 0.6f;//1이상시 뛰는 모드로 전환 그 이하는 걷기 모드//보통 0.6m/s일때 애니메이션 기본 속도
+                else animspeed = 1.5f / 0.6f;//오류튐방지를 위한 최대속도 지정
 
-           
+                anim.SetFloat("Speed", animspeed);//캐릭터 속도 조절
+                dist += diff;//거리 누적
+            }
+          
             timer = 0;
             monitor_diff.text = "초속: " + string.Format("{0:f2}", diff) + " m/s";
             monitor_dist.text = "누적거리: " + string.Format("{0:f2}", dist) + " m";
 
         }
-
-        // forTest1.text = "회전 " + testro.ToString() + "크기  " + testpoz.ToString() + " x이동  " + testpoy.ToString()+"  카 "+camera0.rotation.eulerAngles.x.ToString()+ "  "+camera0.rotation.eulerAngles.y.ToString()+"  "+ camera0.rotation.eulerAngles.z.ToString();
-        //옴 테스트
-
-
-        //옴테스트
-
-        //string test9=" 평면갯수: "+m_ARPlaneManager.trackables.count.ToString();
 
         //**평면인식파트**
         if (isFloor == false)
@@ -211,7 +249,9 @@ public class ShowOrigin : MonoBehaviour
 
                     floorID = plane.trackableId;
                     floor = m_ARPlaneManager.GetPlane(floorID).infinitePlane;
-                    floorheight = floor.distance;
+                    floorheight = floor.distance+0.15f;
+                    var bound = GameObject.FindGameObjectWithTag("mycollider").GetComponent<Collider>().bounds.center;
+                    bound.y = -1*floor.GetDistanceToPoint(m_SessionOrigin.camera.transform.position);
                     isFloor = true;
                     planecondition.enabled = true;
 
@@ -231,13 +271,12 @@ public class ShowOrigin : MonoBehaviour
         {//바닥인식후에 
             
             eyeheight = floor.GetDistanceToPoint(m_SessionOrigin.camera.transform.position);
-            //test13 = "눈높이 " + eyeheight.ToString()+" 바닥높이: "+floorheight.ToString();
             if (minheight > eyeheight) minheight = eyeheight;
             if (maxheight < eyeheight) maxheight = eyeheight;
             bent = maxheight - eyeheight;
             heightmonitor.text = "눈높이: " + eyeheight + "\n굽힘정도: " + string.Format("{0:f2}", bent);
 
-            if (ik==false&&bent > 0.5f)
+            if (ik==false&&bent > 0.55f)
             {
                 if (sitstate == false)
                 {
@@ -260,32 +299,9 @@ public class ShowOrigin : MonoBehaviour
 
             }
         }
-
-        if (foottimer > 3.5f)
-        {
-            if (diff > 0.2f)//보행중일때만 가장 최근의 35초 동안의 방향과 위치를 기록
-            {
-                if (footlist.Count == 10)
-                {
-                    Destroy(footlist[0]);
-                    footlist.RemoveAt(0);
-                }
-                Quaternion tmp = camera0.rotation;
-                tmp.x = 0; tmp.z = 0;
-                GameObject footprints;
-                footprints = Instantiate(trace, new Vector3(camera0.position.x, floorheight * -1 - 0.6f, camera0.position.z), tmp);
-                footprints.transform.localScale = new Vector3(0.035f, 0.035f, 0.035f);
-                footprints.transform.SetParent(m_SessionOrigin.transform);
-                footlist.Add(footprints);
-            }
-            foottimer = 0;
-        }
+     
         timer += Time.deltaTime;
-        foottimer += Time.deltaTime;
-
-
-
-
+ 
     }
    
     public void sidechoice(bool val)
@@ -330,12 +346,7 @@ public class ShowOrigin : MonoBehaviour
     {
         diff = 0;
         dist = 0;
-
-        foreach (GameObject i in footlist)
-        {
-            Destroy(i);
-        }
-
+ 
 
 
         timer = 0;
@@ -350,14 +361,10 @@ public class ShowOrigin : MonoBehaviour
 
     }
     
-    
-
+   
     private void OnDestroy()
     {
-        foreach (GameObject i in footlist)
-        {
-            Destroy(i);
-        }
+       
     }
 }
 
