@@ -158,15 +158,24 @@ public class ShowOrigin : MonoBehaviour
         int time2 = (int)(time / 60.0f);
         timetext.text = time2.ToString() + " 분";
         float right = right_pass + left_pass;
-        float fill = right / total;
-        int fill2 = (int) (fill * 100);
-        totalbar.fillAmount = fill;
-        accutext.text = fill2.ToString() + "%";
-
-        float rightfail = right_fail / (right_fail + right_pass);
-        rightbar.value = rightfail;
-        float leftfail = left_fail / (left_fail + left_pass);
-        leftbar.value = leftfail;
+        if (total != 0)
+        {
+            float fill = right / total;
+            int fill2 = (int)(fill * 100);
+            totalbar.fillAmount = fill;
+            accutext.text = fill2.ToString() + "%";
+        }
+        if (right_fail + right_pass != 0)
+        {
+            float rightfail = right_fail / (right_fail + right_pass);
+            rightbar.value = rightfail;
+        }
+        if(left_fail + left_pass!=0)
+        {
+            float leftfail = left_fail / (left_fail + left_pass);
+            leftbar.value = leftfail;
+        }
+        
     }
     void SettingMulti(float val)
     {

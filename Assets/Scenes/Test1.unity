@@ -3100,7 +3100,7 @@ MonoBehaviour:
   m_MinValue: 0
   m_MaxValue: 1
   m_WholeNumbers: 0
-  m_Value: 0.245
+  m_Value: 0
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -3605,7 +3605,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 100%
+  m_Text: "\uC900\uBE44"
 --- !u!222 &752438624
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -3828,7 +3828,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "0\uBD84\n"
+  m_Text: 
 --- !u!222 &784330747
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -4883,7 +4883,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "0\uBD84\n"
+  m_Text: 
 --- !u!222 &1056048502
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -5123,7 +5123,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "0\uBD84\n"
+  m_Text: 
 --- !u!222 &1129610085
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -7155,7 +7155,7 @@ MonoBehaviour:
   m_MinValue: 0
   m_MaxValue: 1
   m_WholeNumbers: 0
-  m_Value: 0.266
+  m_Value: 0
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
