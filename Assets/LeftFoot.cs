@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
  public class LeftFoot : MonoBehaviour
 {
     // Start is called before the first frame update
@@ -9,8 +8,7 @@ using UnityEngine.UI;
     public Material green;
     public Material red;
     public GameObject trace;
-    private Button resetbtn;
-    private List<GameObject> left_footlist;
+    
     Material material;
     CollideCheck ccheck;
     ShowOrigin main;
@@ -18,10 +16,7 @@ using UnityEngine.UI;
     
     private void Start()
     {
-        resetbtn = GameObject.FindGameObjectWithTag("reset").GetComponent<Button>();
-        resetbtn.onClick.AddListener(resetclick);
         main = GameObject.FindGameObjectWithTag("origin").GetComponent<ShowOrigin>();
-        left_footlist = new List<GameObject>();
         ccheck = GameObject.FindGameObjectWithTag("mycollider").GetComponent<CollideCheck>();
 
     }
@@ -32,10 +27,10 @@ using UnityEngine.UI;
         {
             case 0: material = black; main.total++; break;
             case 1:
-            case 4: material = green; main.right_pass++; main.total++; break;
+            case 4: material = green; main.left_pass++; main.total++; break;
             case 2:
             case 3:
-            case 5: material = red; main.right_fail++; main.total++; break;
+            case 5: material = red; main.left_fail++; main.total++; break;
 
 
 
@@ -47,7 +42,7 @@ using UnityEngine.UI;
     public void StepL()
     {
         choose();
-        if (left_footlist.Count > 20) left_footlist.RemoveAt(0);
+        if (main.left_footlist.Count > 20) main.left_footlist.RemoveAt(0);
 
         var foot1 = transform;
         Vector3 vec1 = foot1.position;
@@ -59,20 +54,10 @@ using UnityEngine.UI;
         footprints = Instantiate(trace, vec1, qua1);
         footprints.GetComponent<MeshRenderer>().material = material;
         footprints.transform.localScale = new Vector3(0.01f, 0.01f, 0.02f);
-        left_footlist.Add(footprints);
+        main.left_footlist.Add(footprints);
 
     }
 
-    private void OnDestroy()
-    {
-        foreach (GameObject i in left_footlist)
-        {
-            Destroy(i);
-        }
-    }
-    private void resetclick()
-    {
-        foreach (GameObject g in left_footlist)
-            Destroy(g);
-    }
+   
+   
 }

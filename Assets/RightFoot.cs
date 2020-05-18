@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class RightFoot : MonoBehaviour
 {
@@ -10,18 +9,14 @@ public class RightFoot : MonoBehaviour
     public Material green;
     public Material red;
     public GameObject trace;
-    private Button resetbtn;
-    private List<GameObject> right_footlist;
     Material material;
     CollideCheck ccheck;
     ShowOrigin main;
     
     private void Start()
     {
-        resetbtn = GameObject.FindGameObjectWithTag("reset").GetComponent<Button>();
-        resetbtn.onClick.AddListener(resetclick);
+       
         main = GameObject.FindGameObjectWithTag("origin").GetComponent<ShowOrigin>();
-        right_footlist = new List<GameObject>();
         ccheck = GameObject.FindGameObjectWithTag("mycollider").GetComponent<CollideCheck>();
     }
     void choose()
@@ -44,7 +39,7 @@ public class RightFoot : MonoBehaviour
     public void StepR()
     {
         choose();
-        if (right_footlist.Count > 20) right_footlist.RemoveAt(0);
+        if (main.right_footlist.Count > 20) main.right_footlist.RemoveAt(0);
         
         var foot1 = transform;
         Vector3 vec1 = foot1.position;
@@ -56,20 +51,8 @@ public class RightFoot : MonoBehaviour
         footprints = Instantiate(trace, vec1, qua1);
         footprints.GetComponent<MeshRenderer>().material = material;
         footprints.transform.localScale = new Vector3(0.01f, 0.01f, 0.02f);
-        right_footlist.Add(footprints);
+        main.right_footlist.Add(footprints);
 
     }
 
-    private void OnDestroy()
-    {
-        foreach (GameObject i in right_footlist)
-        {
-            Destroy(i);
-        }
-    }
-    private void resetclick()
-    {
-        foreach (GameObject g in right_footlist)
-            Destroy(g);
-    }
 }

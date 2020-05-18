@@ -20,11 +20,15 @@ public class ShowOrigin : MonoBehaviour
     public Slider multiply;
     //그래프 UI
     Toggle graphtog;
-    [HideInInspector] public int right_pass;
-    [HideInInspector] public int right_fail;
+    [HideInInspector] public float right_pass;
+    [HideInInspector] public float right_fail;
 
-    [HideInInspector] public int left_pass;
-    [HideInInspector] public int left_fail;
+    [HideInInspector] public float left_pass;
+    [HideInInspector] public float left_fail;
+    bool graphshow = false;
+    [HideInInspector] public  List<GameObject> left_footlist;
+    [HideInInspector] public List<GameObject> right_footlist;
+
 
     [HideInInspector] public int total;
     public Image totalbar;
@@ -123,6 +127,9 @@ public class ShowOrigin : MonoBehaviour
 
         dist = 0f;
         //테스트원
+        right_footlist = new List<GameObject>();
+        left_footlist = new List<GameObject>();
+
 
         model = Instantiate(human, Vector3.zero, Quaternion.identity);
 
@@ -144,12 +151,13 @@ public class ShowOrigin : MonoBehaviour
     }
     public void settinggraph(bool val)
     {
+        graphshow = true;
         steptext.text = total.ToString() + " 걸음";
         distancetext.text = string.Format("{0:f2}", dist) + " m";
         float time = Time.realtimeSinceStartup;
         int time2 = (int)(time / 60.0f);
         timetext.text = time2.ToString() + " 분";
-        int right = right_pass + left_pass;
+        float right = right_pass + left_pass;
         float fill = right / total;
         int fill2 = (int) (fill * 100);
         totalbar.fillAmount = fill;
@@ -220,13 +228,16 @@ public class ShowOrigin : MonoBehaviour
             }
             else//보행파트-공간인식이용파트
             {
-                ik = false;
+                if (!iktog.isOn)
+                {
+                    ik = false;
+                }
                 anim.SetBool("isIK", false);
                 if (diff < 1.5f) animspeed = diff / 0.6f;//1이상시 뛰는 모드로 전환 그 이하는 걷기 모드//보통 0.6m/s일때 애니메이션 기본 속도
                 else animspeed = 1.5f / 0.6f;//오류튐방지를 위한 최대속도 지정
-
                 anim.SetFloat("Speed", animspeed);//캐릭터 속도 조절
                 dist += diff;//거리 누적
+                
             }
           
             timer = 0;
@@ -299,7 +310,10 @@ public class ShowOrigin : MonoBehaviour
 
             }
         }
-     
+        if(graphshow)
+        {
+            settinggraph(true);
+        }
         timer += Time.deltaTime;
  
     }
@@ -355,16 +369,31 @@ public class ShowOrigin : MonoBehaviour
         sitstate = false;
         maxheight = eyeheight;
 
-        if (ik ==false) anim.Play("tpose"); 
+        if (ik ==false) anim.Play("tpose");
 
-
-
+        foreach (GameObject g in left_footlist)
+        {
+            Destroy(g);
+        }
+           
+        foreach (GameObject i in right_footlist)
+        {
+            Destroy(i);
+        }
     }
     
    
     private void OnDestroy()
     {
-       
+        foreach (GameObject g in left_footlist)
+        {
+            Destroy(g);
+        }
+        foreach (GameObject g in right_footlist)
+        {
+            Destroy(g);
+        }
+
     }
 }
 
