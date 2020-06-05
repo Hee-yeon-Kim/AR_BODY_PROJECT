@@ -73,7 +73,7 @@ public class ikcontroller : MonoBehaviour
             //종아리
             if (btmanager.isnew2)//새로운 데이터 유입시 움직일 gap 방향 , 총 회전각 업데이트
             {
-                pitch2 =  btmanager.lowerleg_array[1];
+                pitch2 =  btmanager.lowerleg_array[1]*main.multi;
                 roll2 = btmanager.lowerleg_array[2];
                 bent = pitch1 - pitch2;//0이 최대
                 if (bent > 0) bent = 0;

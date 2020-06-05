@@ -29,7 +29,8 @@ public class ShowOrigin : MonoBehaviour
     [HideInInspector] public  List<GameObject> left_footlist;
     [HideInInspector] public List<GameObject> right_footlist;
 
-
+    public Slider test1;
+    public Slider test2;
     [HideInInspector] public int total;
     public Image totalbar;
     public Slider leftbar;
@@ -39,6 +40,7 @@ public class ShowOrigin : MonoBehaviour
     public Text steptext;
     public Text accutext;
     //
+    public Button settingbtn;
 
     private GameObject model;
     private TrackableId floorID;
@@ -55,6 +57,8 @@ public class ShowOrigin : MonoBehaviour
 
     private Animator anim;
     private float animspeed;
+    private float testro2;
+    
    
     private bool sitstate = false;
 
@@ -64,17 +68,17 @@ public class ShowOrigin : MonoBehaviour
     private Vector3 prePo;
     private Vector3 currPo;
 
-
+    private float testscale;
     private Image planecondition;
     private Text heightmonitor;
     private float minheight;
     private float maxheight;
-    private Text monitor_dist;
+    //private Text monitor_dist;
     private Text monitor_diff;
     private float testro;
     private float testpoy;
     private float testpoz;
-
+    public Slider test3;
     private string x;
     public Toggle iktog;
     [HideInInspector] public bool ik = true;
@@ -92,7 +96,7 @@ public class ShowOrigin : MonoBehaviour
        
         var monitor = GameObject.FindGameObjectsWithTag("monitor");
         monitor_diff = monitor[0].GetComponent<Text>();
-        monitor_dist = monitor[1].GetComponent<Text>();
+        //monitor_dist = monitor[1].GetComponent<Text>();
          ik = false;
         side = true;
         multi = 1.5f;
@@ -106,7 +110,8 @@ public class ShowOrigin : MonoBehaviour
     }
     void Start()
     {
-        floorheight = 0.0f;
+       
+        
         var list = GameObject.FindGameObjectsWithTag("body");
         for (int i = 0; i < list.Length; i++)
         {
@@ -115,10 +120,12 @@ public class ShowOrigin : MonoBehaviour
             mat.SetColor("_Color", new Color(mat.color.r, mat.color.g, mat.color.b, 1.0f));
 
         }
+        floorheight = 0.0f;
+        testscale = 1.4217f;
         testro = -67.1418f;
         testpoy = -0.5975334f;
-        testpoz = 1.28f;
-     
+        testpoz = 1.707663f;//1.28
+        testro2 = 74.6210f;
         prePo = Vector3.zero;
         currPo = Vector3.zero;
 
@@ -133,21 +140,54 @@ public class ShowOrigin : MonoBehaviour
 
         model = Instantiate(human, Vector3.zero, Quaternion.identity);
 
-        model.transform.localScale = new Vector3(0.8f, 1.0f, 0.9f);
+        model.transform.localScale = new Vector3(0.8f*testscale, 1.0f*testscale, 0.9f*testscale);
         model.transform.SetParent(m_SessionOrigin.camera.transform);
-        Vector3 v = Vector3.zero; v.y = -0.5975334f; v.z = 1.28f;
+        Vector3 v = Vector3.zero; v.y = -0.5975334f; v.z = testpoz;
         model.transform.position = v;
 
-        model.transform.rotation = Quaternion.Euler(-67.1418f, 0f, 0);
+        model.transform.rotation = Quaternion.Euler(-1*testro2, 0f, 0);
  
         anim = model.GetComponent<Animator>();
         alphaslider.onValueChanged.AddListener((float val) => SettingAlpha(val));
         multiply.onValueChanged.AddListener((float val) => SettingMulti(val));
+        test1.onValueChanged.AddListener((float val) => Settingtestro2(val));
+        test2.onValueChanged.AddListener((float val) => Settingtestpoz(val));
+        test3.onValueChanged.AddListener((float val) => Settingtestscale(val));
 
         righttog.onValueChanged.AddListener((bool val) => sidechoice(val));
         resetbtn.onClick.AddListener(resetclick);
         iktog.onValueChanged.AddListener((bool val) => setik(val));
-        
+        settingbtn.onClick.AddListener(settingclick);
+
+    }
+    public void settingclick()
+    {
+        test3.value = 1.42f;
+        testscale = 1.4217f;
+       
+        test2.value = 1.70f;
+        testpoz = 1.707663f;//1.28
+
+        test1.value = 74.62f;
+        testro2 = 74.6210f;
+        multi = 1.0f;
+   
+    }
+    public void Settingtestscale(float val)
+    {
+        testscale = test3.value;
+        test3.GetComponentInChildren<Text>().text = "크기 " + string.Format("{0:f2}", test3.value);
+        if(model!=null) model.transform.localScale = new Vector3(0.8f * testscale, 1.0f * testscale, 0.9f * testscale);
+    }
+    public void Settingtestro2(float val)
+    {
+        testro2 = test1.value;
+        test1.GetComponentInChildren<Text>().text = "회전율 " + string.Format("{0:f2}", test1.value);
+    }
+    public void Settingtestpoz(float val)
+    {
+        testpoz = test2.value;
+        test2.GetComponentInChildren<Text>().text = "가상신체거리 " + string.Format("{0:f2}", test2.value);
     }
     public void settinggraph(bool val)
     {
@@ -168,12 +208,12 @@ public class ShowOrigin : MonoBehaviour
         if (right_fail + right_pass != 0)
         {
             float rightfail = right_fail / (right_fail + right_pass);
-            rightbar.value = rightfail;
+            //rightbar.value = rightfail;
         }
         if(left_fail + left_pass!=0)
         {
             float leftfail = left_fail / (left_fail + left_pass);
-            leftbar.value = leftfail;
+            //leftbar.value = leftfail;
         }
         
     }
@@ -214,9 +254,9 @@ public class ShowOrigin : MonoBehaviour
         Vector3 v = Vector3.zero; v.y = testpoy; v.z = testpoz;
         model.transform.localPosition = v;
 
-        if (angle > 20 && angle < 80) testro = (angle - 20) * -2 / 15 - 67f;
-        else angle = -67f;
-
+        if (angle > 20 && angle < 80) testro = (angle - 20) * -2 / 15 - testro2;
+        else angle = -testro2;
+        
         model.transform.localRotation = Quaternion.Euler(testro, 0f, 0);
         
 
@@ -228,14 +268,14 @@ public class ShowOrigin : MonoBehaviour
             prePo.y = 0;
             currPo.y = 0;
             diff = Vector3.Distance(prePo, currPo);//초속 ( 1초당 이동한 거리)
-            if (diff < 0.1f)
+            if (diff < 0.1f&&sitstate==false)
             {
                 ik = true;//거의 정지-모션캡쳐파트
               
                 anim.SetBool("isIK", true);
                 anim.SetTrigger("Empty");
             }
-            else//보행파트-공간인식이용파트
+            else if(sitstate == false)//보행파트-공간인식이용파트
             {
                 if (!iktog.isOn)
                 {
@@ -251,7 +291,7 @@ public class ShowOrigin : MonoBehaviour
           
             timer = 0;
             monitor_diff.text = "초속: " + string.Format("{0:f2}", diff) + " m/s";
-            monitor_dist.text = "누적거리: " + string.Format("{0:f2}", dist) + " m";
+            //monitor_dist.text = "누적거리: " + string.Format("{0:f2}", dist) + " m";
 
         }
 
@@ -294,15 +334,17 @@ public class ShowOrigin : MonoBehaviour
             if (minheight > eyeheight) minheight = eyeheight;
             if (maxheight < eyeheight) maxheight = eyeheight;
             bent = maxheight - eyeheight;
-            heightmonitor.text = "눈높이: " + eyeheight + "\n굽힘정도: " + string.Format("{0:f2}", bent);
-
-            if (ik==false&&bent > 0.55f)
+            if(bent>0.6f) { heightmonitor.text = "기립여부: " + "NO"; }
+            else { heightmonitor.text = "기립여부: " + "YES"; }
+            if (bent > 0.6f)
             {
                 if (sitstate == false)
                 {
-                    anim.SetTrigger("goSit");
                     anim.SetBool("isSit", true);//앉은 모드로의 전환
+                    anim.SetTrigger("goSit");
+                    
                     sitstate = true;
+                    ik = false;
                    // ik = true;//블루투스 연결확인필요
                 }
 
@@ -310,10 +352,11 @@ public class ShowOrigin : MonoBehaviour
             }
             else
             {
-                if (ik == false && sitstate == true)
+                if ( sitstate == true)
                 {
                     anim.SetBool("isSit", false);//tpose로의 전환
                     sitstate = false;
+                    ik = true;
                    
                 }
 
@@ -376,7 +419,7 @@ public class ShowOrigin : MonoBehaviour
 
         // walkstate = false;
         sitstate = false;
-        maxheight = eyeheight;
+        maxheight = floor.GetDistanceToPoint(m_SessionOrigin.camera.transform.position);
 
         if (ik ==false) anim.Play("tpose");
 

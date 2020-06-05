@@ -46,12 +46,14 @@ SpriteAtlas:
     - {fileID: 2800000, guid: 37628ae04305e5e4c92686621495026d, type: 3}
     - {fileID: 2800000, guid: 75163f5ec55c84d42992bb018075feba, type: 3}
     - {fileID: 2800000, guid: 7901779951cc3b0478a412555d129c84, type: 3}
-    totalSpriteSurfaceArea: 857536
+    - {fileID: 2800000, guid: 6f4f636108f15564aae830d7285962c7, type: 3}
+    totalSpriteSurfaceArea: 900304
     bindAsDefault: 1
   m_MasterAtlas: {fileID: 0}
   m_PackedSprites:
   - {fileID: 21300000, guid: c7fb9080eeb51864a926608dc9436c80, type: 3}
   - {fileID: 21300000, guid: d4e32f41939e5c642a42bf478a9cd0c9, type: 3}
+  - {fileID: 21300000, guid: 6f4f636108f15564aae830d7285962c7, type: 3}
   - {fileID: 21300000, guid: 9430668144f224f48876b673b444b909, type: 3}
   - {fileID: 21300000, guid: 4e92bb63480937c45b01c5d3145bb47d, type: 3}
   - {fileID: 21300000, guid: 73fc9e444f8d56d4aa9c7b9659922f75, type: 3}
@@ -65,6 +67,7 @@ SpriteAtlas:
   m_PackedSpriteNamesToIndex:
   - r_right
   - g_left
+  - logo
   - doneicon
   - straight_path
   - circle_path
